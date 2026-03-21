@@ -54,6 +54,12 @@ npm install
 2. 将 `ENV_ID` 变量的值修改为您的云开发环境 ID
 3. 将 `vite.config.js` 中的`https://envId-appid.tcloudbaseapp.com/` 替换为你的云开发环境静态托管默认域名，可以使用 MCP 来查询云开发环境静态托管默认域名
 
+### 登录方式（短信验证码）
+
+1. 在 [CloudBase 控制台](https://console.cloud.tencent.com/tcb) → **身份认证** → **登录方式** 中，**开启「短信验证码」**（可按需关闭「用户名密码」）。
+2. 在 `src/config/auth.js` 中配置 `SUPERADMIN_PHONES`，填入超级管理员的 **11 位手机号**（与登录账号一致）。
+3. 前端使用 `auth().getVerification` + `auth().signInWithSms`（见 `AuthContext.jsx`），新用户首次验证通过会自动注册，无需单独设置密码。
+
 ### 本地开发
 
 ```bash
