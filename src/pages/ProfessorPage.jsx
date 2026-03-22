@@ -172,7 +172,7 @@ const ProfessorPage = () => {
   const pageData = data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="w-full py-8 px-[24px]">
       <h1 className="text-2xl font-bold mb-6">项目管理（教授端）</h1>
 
       <input
@@ -208,7 +208,6 @@ const ProfessorPage = () => {
                   <th>方向</th>
                   <th>文件</th>
                   <th>时间</th>
-                  <th>费用</th>
                   <th>备注</th>
                   <th>进度</th>
                   <th>标书</th>
@@ -218,7 +217,7 @@ const ProfessorPage = () => {
               <tbody>
                 {pageData.length === 0 ? (
                   <tr>
-                    <td colSpan={11} className="text-center py-8 text-base-content/60">
+                    <td colSpan={10} className="text-center py-8 text-base-content/60">
                       暂无数据
                     </td>
                   </tr>
@@ -249,13 +248,6 @@ const ProfessorPage = () => {
                         )}
                       </td>
                       <td>{row.deliveryTime || '-'}</td>
-                      <td>
-                        {row.fee != null
-                          ? typeof row.fee === 'number'
-                            ? `¥${row.fee.toFixed(2)}`
-                            : row.fee
-                          : '-'}
-                      </td>
                       <td className="max-w-[120px] truncate" title={row.remark}>
                         {row.remark || '-'}
                       </td>

@@ -1,8 +1,9 @@
 /**
- * 超级管理员手机号列表（11 位数字，与短信登录账号一致）
- * 使用这些手机号登录的用户将拥有 SuperAdmin 权限
+ * 认证相关工具函数
+ *
+ * 超级管理员：在云数据库集合 `super_admins` 中维护记录，字段 `phone` 为 11 位数字，
+ * 与当前登录用户手机号一致时，即视为超级管理员（见 AuthContext 中 fetchIsSuperAdmin）。
  */
-export const SUPERADMIN_PHONES = ['15575947551'] // 改为你的管理员手机号
 
 /** 规范化手机号：仅保留数字，去掉 +86 前缀 */
 export function normalizePhone(input) {

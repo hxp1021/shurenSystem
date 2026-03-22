@@ -57,7 +57,7 @@ npm install
 ### 登录方式（短信验证码）
 
 1. 在 [CloudBase 控制台](https://console.cloud.tencent.com/tcb) → **身份认证** → **登录方式** 中，**开启「短信验证码」**（可按需关闭「用户名密码」）。
-2. 在 `src/config/auth.js` 中配置 `SUPERADMIN_PHONES`，填入超级管理员的 **11 位手机号**（与登录账号一致）。
+2. 在云数据库集合 `super_admins` 中添加记录，字段 `phone` 为超级管理员的 **11 位手机号**（与短信登录一致）。
 3. 前端使用 `auth().getVerification` + `auth().signInWithSms`（见 `AuthContext.jsx`），新用户首次验证通过会自动注册，无需单独设置密码。
 
 ### 本地开发

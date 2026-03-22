@@ -23,6 +23,7 @@ const PAGE_SIZE = 10
 const PROJECT_OPTIONS = ['中管局', '卫生厅', '省自然', '国青', '面上', '其他']
 // 进度选项：仅教授端可编辑，SuperAdmin 只读
 const STATUS_OPTIONS = ['未开展', '进展中', '已交付']
+const FEE_TYPE_OPTIONS = ['自费', '经费']
 
 const SuperAdmin = () => {
   const [data, setData] = useState([])
@@ -188,6 +189,8 @@ const SuperAdmin = () => {
       deliveryTime: record.deliveryTime || '',
       fee: record.fee != null ? String(record.fee) : '',
       paid: record.paid ?? false,
+      paidAmount: record.paidAmount != null ? String(record.paidAmount) : '',
+      feeType: record.feeType || '',
       traffic: record.traffic || '',
       remark: record.remark || '',
       deliveryStatus: record.deliveryStatus || '未开展',
@@ -250,6 +253,8 @@ const SuperAdmin = () => {
         deliveryTime: rest.deliveryTime || null,
         fee: rest.fee === '' ? null : rest.fee,
         paid: rest.paid ?? false,
+        paidAmount: rest.paidAmount === '' ? null : rest.paidAmount,
+        feeType: rest.feeType || null,
         traffic: rest.traffic ?? '',
         remark: rest.remark ?? '',
         // 进度仅教授端可编辑，标书由教授端上传，SuperAdmin 不可编辑
@@ -300,7 +305,7 @@ const SuperAdmin = () => {
   const pageData = data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="w-full py-8 px-[24px]">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">项目管理</h1>
         <div className="flex gap-2">
@@ -310,9 +315,6 @@ const SuperAdmin = () => {
           >
             添加教授
           </button>
-          <a href="/#/professor" className="btn btn-sm btn-ghost">
-            教授端
-          </a>
         </div>
       </div>
 
@@ -343,8 +345,10 @@ const SuperAdmin = () => {
                   <th>方向</th>
                   <th>文件</th>
                   <th>交付时间</th>
-                  <th>费用</th>
+                  <th>费用（万）</th>
                   <th>已付</th>
+                  <th>已付金额（万）</th>
+                  <th>费用类型</th>
                   <th>导流</th>
                   <th>备注</th>
                   <th>进度</th>
@@ -358,7 +362,7 @@ const SuperAdmin = () => {
               <tbody>
                 {pageData.length === 0 ? (
                   <tr>
-                    <td colSpan={16} className="text-center py-8 text-base-content/60">
+                    <td colSpan={18} className="text-center py-8 text-base-content/60">
                       暂无数据
                     </td>
                   </tr>
@@ -392,8 +396,10 @@ const SuperAdmin = () => {
                         )}
                       </td>
                       <td>{row.deliveryTime || '-'}</td>
-                      <td>{row.fee != null ? `¥${Number(row.fee).toFixed(2)}` : '-'}</td>
+                      <td>{row.fee != null ? `${Number(row.fee)}` : '-'}</td>
                       <td>{row.paid ? '是' : '否'}</td>
+                      <td>{row.paidAmount != null ? `${Number(row.paidAmount)}` : '-'}</td>
+                      <td>{row.feeType || '-'}</td>
                       <td>{row.traffic ?? '-'}</td>
                       <td className="max-w-[120px] truncate" title={row.remark}>
                         {row.remark || '-'}
@@ -546,7 +552,7 @@ const SuperAdmin = () => {
               />
             </div>
             <div className="form-control">
-              <label className="label"><span className="label-text">费用</span></label>
+              <label className="label"><span className="label-text">费用（万）</span></label>
               <input
                 type="text"
                 className="input input-bordered"
@@ -563,6 +569,28 @@ const SuperAdmin = () => {
               >
                 <option value="否">否</option>
                 <option value="是">是</option>
+              </select>
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text">已付金额（万）</span></label>
+              <input
+                type="text"
+                className="input input-bordered"
+                value={editForm.paidAmount ?? ''}
+                onChange={(e) => setEditForm((f) => ({ ...f, paidAmount: e.target.value }))}
+              />
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text">费用类型</span></label>
+              <select
+                className="select select-bordered"
+                value={editForm.feeType || ''}
+                onChange={(e) => setEditForm((f) => ({ ...f, feeType: e.target.value }))}
+              >
+                <option value="">请选择</option>
+                {FEE_TYPE_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
               </select>
             </div>
             <div className="form-control">

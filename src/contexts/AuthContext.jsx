@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import cloudbase from '../utils/cloudbase'
-import { SUPERADMIN_PHONES, getUserPhone, normalizePhone } from '../config/auth'
+import { getUserPhone, normalizePhone } from '../config/auth'
 
 const AuthContext = createContext(null)
 
@@ -18,27 +18,43 @@ async function fetchProfessorByPhone(phoneNorm) {
   return null
 }
 
+/** 查询 super_admins 集合，phone 与当前登录手机号一致则为超级管理员 */
+async function fetchIsSuperAdmin(phoneNorm) {
+  if (!phoneNorm) return false
+  try {
+    const db = cloudbase.app.database()
+    const res = await db.collection('super_admins').where({ phone: phoneNorm }).get()
+    return (res.data?.length ?? 0) > 0
+  } catch (err) {
+    console.error('查询 super_admins 失败', err)
+    return false
+  }
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [currentProfessor, setCurrentProfessor] = useState(null)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  const userPhone = getUserPhone(user)
-  const isSuperAdmin =
-    !!userPhone &&
-    SUPERADMIN_PHONES.some((p) => normalizePhone(p) === userPhone)
-
-  const refreshProfessor = async (loginUser) => {
+  /**
+   * 根据登录用户同步 isSuperAdmin、currentProfessor
+   * 两者可并存：同一人可既是超级管理员又是教授
+   */
+  const refreshRoles = async (loginUser) => {
     const phone = getUserPhone(loginUser)
-    const superAdmin =
-      !!phone &&
-      SUPERADMIN_PHONES.some((p) => normalizePhone(p) === phone)
-    if (!phone || superAdmin) {
+    if (!phone) {
+      setIsSuperAdmin(false)
       setCurrentProfessor(null)
-      return
+      return { isSuperAdmin: false, isProfessor: false }
     }
+    const superAdmin = await fetchIsSuperAdmin(phone)
+    setIsSuperAdmin(superAdmin)
+
     const prof = await fetchProfessorByPhone(phone)
     setCurrentProfessor(prof)
+
+    return { isSuperAdmin: superAdmin, isProfessor: !!prof }
   }
 
   useEffect(() => {
@@ -48,23 +64,16 @@ export const AuthProvider = ({ children }) => {
         const loginState = await auth.getLoginState()
         if (loginState?.user) {
           setUser(loginState.user)
-          const phone = getUserPhone(loginState.user)
-          const superAdmin =
-            !!phone &&
-            SUPERADMIN_PHONES.some((p) => normalizePhone(p) === phone)
-          if (!superAdmin) {
-            const prof = await fetchProfessorByPhone(phone)
-            setCurrentProfessor(prof)
-          } else {
-            setCurrentProfessor(null)
-          }
+          await refreshRoles(loginState.user)
         } else {
           setUser(null)
+          setIsSuperAdmin(false)
           setCurrentProfessor(null)
         }
       } catch (err) {
         console.error('Auth init error', err)
         setUser(null)
+        setIsSuperAdmin(false)
       } finally {
         setLoading(false)
       }
@@ -74,7 +83,7 @@ export const AuthProvider = ({ children }) => {
 
   /**
    * 发送短信验证码（控制台需开启「短信验证码」登录）
-   * 返回 verification_id / is_user，提交登录时需一并传入
+   * 返回 verification_id / is_user，提交登录时必须一并传入
    */
   const sendSmsCode = async (phoneInput) => {
     const phone = normalizePhone(phoneInput)
@@ -115,9 +124,7 @@ export const AuthProvider = ({ children }) => {
     setUser(loginState.user)
 
     const phoneNorm = getUserPhone(loginState.user)
-    const superAdmin =
-      !!phoneNorm &&
-      SUPERADMIN_PHONES.some((p) => normalizePhone(p) === phoneNorm)
+    const superAdmin = await fetchIsSuperAdmin(phoneNorm)
 
     const displayName = professorName?.trim()
     if (displayName) {
@@ -138,13 +145,11 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    await refreshProfessor(loginState.user)
-
-    const prof = await fetchProfessorByPhone(phoneNorm)
+    const roles = await refreshRoles(loginState.user)
     return {
       loginState,
-      isSuperAdmin: superAdmin,
-      isProfessor: !!prof,
+      isSuperAdmin: roles.isSuperAdmin,
+      isProfessor: roles.isProfessor,
     }
   }
 
@@ -153,6 +158,7 @@ export const AuthProvider = ({ children }) => {
     await auth.signOut()
     setUser(null)
     setCurrentProfessor(null)
+    setIsSuperAdmin(false)
   }
 
   const value = {
