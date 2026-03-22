@@ -248,7 +248,7 @@ const ProfessorPage = () => {
                         )}
                       </td>
                       <td>{row.deliveryTime || '-'}</td>
-                      <td className="max-w-[120px] truncate" title={row.remark}>
+                      <td className="max-w-[200px] whitespace-normal break-words">
                         {row.remark || '-'}
                       </td>
                       <td>

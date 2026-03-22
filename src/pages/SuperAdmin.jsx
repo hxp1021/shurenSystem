@@ -188,7 +188,6 @@ const SuperAdmin = () => {
       direction: record.direction || '',
       deliveryTime: record.deliveryTime || '',
       fee: record.fee != null ? String(record.fee) : '',
-      paid: record.paid ?? false,
       paidAmount: record.paidAmount != null ? String(record.paidAmount) : '',
       feeType: record.feeType || '',
       traffic: record.traffic || '',
@@ -252,7 +251,6 @@ const SuperAdmin = () => {
         direction: rest.direction ?? '',
         deliveryTime: rest.deliveryTime || null,
         fee: rest.fee === '' ? null : rest.fee,
-        paid: rest.paid ?? false,
         paidAmount: rest.paidAmount === '' ? null : rest.paidAmount,
         feeType: rest.feeType || null,
         traffic: rest.traffic ?? '',
@@ -345,9 +343,8 @@ const SuperAdmin = () => {
                   <th>方向</th>
                   <th>文件</th>
                   <th>交付时间</th>
-                  <th>费用（万）</th>
-                  <th>已付</th>
-                  <th>已付金额（万）</th>
+                  <th className="w-16">费用(万)</th>
+                  <th className="w-16">已付金额(万)</th>
                   <th>费用类型</th>
                   <th>导流</th>
                   <th>备注</th>
@@ -362,7 +359,7 @@ const SuperAdmin = () => {
               <tbody>
                 {pageData.length === 0 ? (
                   <tr>
-                    <td colSpan={18} className="text-center py-8 text-base-content/60">
+                    <td colSpan={17} className="text-center py-8 text-base-content/60">
                       暂无数据
                     </td>
                   </tr>
@@ -396,12 +393,11 @@ const SuperAdmin = () => {
                         )}
                       </td>
                       <td>{row.deliveryTime || '-'}</td>
-                      <td>{row.fee != null ? `${Number(row.fee)}` : '-'}</td>
-                      <td>{row.paid ? '是' : '否'}</td>
-                      <td>{row.paidAmount != null ? `${Number(row.paidAmount)}` : '-'}</td>
+                      <td className="w-16">{row.fee != null ? `${Number(row.fee)}` : '-'}</td>
+                      <td className="w-16">{row.paidAmount != null ? `${Number(row.paidAmount)}` : '-'}</td>
                       <td>{row.feeType || '-'}</td>
                       <td>{row.traffic ?? '-'}</td>
-                      <td className="max-w-[120px] truncate" title={row.remark}>
+                      <td className="max-w-[200px] whitespace-normal break-words">
                         {row.remark || '-'}
                       </td>
                       <td>
@@ -552,7 +548,7 @@ const SuperAdmin = () => {
               />
             </div>
             <div className="form-control">
-              <label className="label"><span className="label-text">费用（万）</span></label>
+              <label className="label"><span className="label-text">费用(万)</span></label>
               <input
                 type="text"
                 className="input input-bordered"
@@ -561,18 +557,7 @@ const SuperAdmin = () => {
               />
             </div>
             <div className="form-control">
-              <label className="label"><span className="label-text">已付</span></label>
-              <select
-                className="select select-bordered"
-                value={editForm.paid ? '是' : '否'}
-                onChange={(e) => setEditForm((f) => ({ ...f, paid: e.target.value === '是' }))}
-              >
-                <option value="否">否</option>
-                <option value="是">是</option>
-              </select>
-            </div>
-            <div className="form-control">
-              <label className="label"><span className="label-text">已付金额（万）</span></label>
+              <label className="label"><span className="label-text">已付金额(万)</span></label>
               <input
                 type="text"
                 className="input input-bordered"
